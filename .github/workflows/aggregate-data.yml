@@ -25,21 +25,28 @@ jobs:
         with:
           node-version: "20"
 
-      # TODO: Replace this block with your real aggregator script.
-      - name: Generate data_out (demo)
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate aggregated data
         run: |
           COMMIT=$(git rev-parse --short HEAD)
           TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           mkdir -p data_out
+          
+          # Run the aggregation script
+          node scripts/aggregate-data.js
+          
+          # Add version info to index.json
           cat > data_out/index.json <<JSON
           {
             "version": "$TS-$COMMIT",
             "last_updated": "$TS",
-            "projects": []
+            "projects": $(cat data_out/projects.json | jq -r '.projects | length'),
+            "total_results": $(cat data_out/leaderboard.json | jq -r '.totals.reports'),
+            "total_contributors": $(cat data_out/leaderboard.json | jq -r '.totals.contributors')
           }
           JSON
-          # Example other files your site expects:
-          echo '{"contributors":[],"totals":{"contributors":0,"reports":0,"points":0},"last_updated":"'"$TS"'","period":"all-time","scoring":{"Critical":10,"High":6,"Medium":3,"Low":1,"first_report_bonus":2,"quality_bonus":1}}' > data_out/leaderboard.json
 
       - name: Add Vercel project metadata + headers
         run: |
