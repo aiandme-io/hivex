@@ -54,15 +54,45 @@ jobs:
           printf '{"projectId":"%s","orgId":"%s"}' "$VERCEL_PROJECT_ID" "$VERCEL_ORG_ID" > data_out/.vercel/project.json
           cat > data_out/vercel.json << 'JSON'
           {
-            "headers": [{
-              "source": "/(.*)",
-              "headers": [
-                { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
-                { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" }
-              ]
-            }]
+            "headers": [
+              {
+                "source": "/(.*)",
+                "headers": [
+                  { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
+                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+                  { "key": "Access-Control-Max-Age", "value": "86400" },
+                  { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" }
+                ]
+              },
+              {
+                "source": "/api/(.*)",
+                "headers": [
+                  { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
+                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+                  { "key": "Access-Control-Max-Age", "value": "86400" }
+                ]
+              }
+            ]
           }
           JSON
+          
+          # Also create _headers file as backup CORS method
+          cat > data_out/_headers << 'HEADERS'
+          /*
+            Access-Control-Allow-Origin: https://hivex.aiandme.io
+            Access-Control-Allow-Methods: GET, OPTIONS
+            Access-Control-Allow-Headers: Content-Type, Authorization
+            Access-Control-Max-Age: 86400
+            Cache-Control: public, max-age=60, s-maxage=60
+
+          /api/*
+            Access-Control-Allow-Origin: https://hivex.aiandme.io
+            Access-Control-Allow-Methods: GET, OPTIONS
+            Access-Control-Allow-Headers: Content-Type, Authorization
+            Access-Control-Max-Age: 86400
+          HEADERS
         env:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
