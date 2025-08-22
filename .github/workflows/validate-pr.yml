@@ -1,0 +1,42 @@
+name: Validate PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "project/**"
+      - "schemas/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Install validators
+        run: npm i -g ajv-cli@5 ajv-formats@2
+
+      - name: Validate result.json files
+        run: |
+          set -e
+          shopt -s nullglob
+          files=( $(find project -type f -path "project/*/results/*/result.json") )
+          for f in "${files[@]}"; do
+            echo "ajv validate $f"
+            ajv -c ajv-formats validate -s schemas/result.schema.json -d "$f" --strict=false
+          done
+          echo "Checked ${#files[@]} result.json files."
+
+      - name: Validate project.json files
+        run: |
+          set -e
+          shopt -s nullglob
+          files=( $(find project -type f -path "project/*/project.json") )
+          for f in "${files[@]}"; do
+            echo "ajv validate $f"
+            ajv -c ajv-formats validate -s schemas/project.schema.json -d "$f" --strict=false
+          done
+          echo "Checked ${#files[@]} project.json files."
