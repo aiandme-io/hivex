@@ -59,8 +59,8 @@ jobs:
                 "source": "/(.*)",
                 "headers": [
                   { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
-                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
+                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
                   { "key": "Access-Control-Max-Age", "value": "86400" },
                   { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" }
                 ]
@@ -69,8 +69,17 @@ jobs:
                 "source": "/api/(.*)",
                 "headers": [
                   { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
-                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
-                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
+                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
+                  { "key": "Access-Control-Max-Age", "value": "86400" }
+                ]
+              },
+              {
+                "source": "/(.*\\.json)",
+                "headers": [
+                  { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
+                  { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
+                  { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With" },
                   { "key": "Access-Control-Max-Age", "value": "86400" }
                 ]
               }
@@ -82,15 +91,21 @@ jobs:
           cat > data_out/_headers << 'HEADERS'
           /*
             Access-Control-Allow-Origin: https://hivex.aiandme.io
-            Access-Control-Allow-Methods: GET, OPTIONS
-            Access-Control-Allow-Headers: Content-Type, Authorization
+            Access-Control-Allow-Methods: GET, OPTIONS, HEAD
+            Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
             Access-Control-Max-Age: 86400
             Cache-Control: public, max-age=60, s-maxage=60
 
           /api/*
             Access-Control-Allow-Origin: https://hivex.aiandme.io
-            Access-Control-Allow-Methods: GET, OPTIONS
-            Access-Control-Allow-Headers: Content-Type, Authorization
+            Access-Control-Allow-Methods: GET, OPTIONS, HEAD
+            Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+            Access-Control-Max-Age: 86400
+
+          *.json
+            Access-Control-Allow-Origin: https://hivex.aiandme.io
+            Access-Control-Allow-Methods: GET, OPTIONS, HEAD
+            Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
             Access-Control-Max-Age: 86400
           HEADERS
         env:
