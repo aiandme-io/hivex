@@ -1,0 +1,74 @@
+name: Aggregate & Deploy HiveX data
+
+on:
+  push:
+    branches:
+      - "project/**"     # project branches
+      - main             # include if you also want main merges to publish
+  workflow_dispatch: {}
+
+concurrency:
+  group: hivex-data-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # TODO: Replace this block with your real aggregator script.
+      - name: Generate data_out (demo)
+        run: |
+          COMMIT=$(git rev-parse --short HEAD)
+          TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          mkdir -p data_out
+          cat > data_out/index.json <<JSON
+          {
+            "version": "$TS-$COMMIT",
+            "last_updated": "$TS",
+            "projects": []
+          }
+          JSON
+          # Example other files your site expects:
+          echo '{"contributors":[],"totals":{"contributors":0,"reports":0,"points":0},"last_updated":"'"$TS"'","period":"all-time","scoring":{"Critical":10,"High":6,"Medium":3,"Low":1,"first_report_bonus":2,"quality_bonus":1}}' > data_out/leaderboard.json
+
+      - name: Add Vercel project metadata + headers
+        run: |
+          mkdir -p data_out/.vercel
+          printf '{"projectId":"%s","orgId":"%s"}' "$VERCEL_PROJECT_ID" "$VERCEL_ORG_ID" > data_out/.vercel/project.json
+          cat > data_out/vercel.json << 'JSON'
+          {
+            "headers": [{
+              "source": "/(.*)",
+              "headers": [
+                { "key": "Access-Control-Allow-Origin", "value": "https://hivex.aiandme.io" },
+                { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=60" }
+              ]
+            }]
+          }
+          JSON
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Deploy to Vercel (prod)
+        run: |
+          vercel deploy --prod --yes \
+            --token "${VERCEL_TOKEN}" \
+            ${VERCEL_SCOPE:+--scope "$VERCEL_SCOPE"} \
+            --cwd data_out
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
