@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aiandme.io/hivex/result.schema.json",
+  "type": "object",
+  "required": ["id", "author_github", "type", "severity", "impact", "submitted_at"],
+  "properties": {
+    "id": { "type": "string", "minLength": 3 },
+    "author_github": { "type": "string", "minLength": 1 },
+    "co_authors": { "type": "array", "items": { "type": "string" } },
+    "type": { "enum": ["manual", "automated"] },
+    "severity": { "enum": ["Critical", "High", "Medium", "Low"] },
+    "cvss_vector": { "type": ["string", "null"] },
+    "impact": { "type": "string", "minLength": 3 },
+    "steps": { "type": "array", "items": { "type": "string" } },
+    "prompt_chain": { "type": "array", "items": { "type": "string" } },
+    "model_info": { "type": "object", "additionalProperties": true },
+    "repro_cmds": { "type": "array", "items": { "type": "string" } },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "object", "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string" }
+      }, "required": ["path"], "additionalProperties": false }
+    },
+    "duplicate_of": { "type": ["string", "null"] },
+    "submitted_at": { "type": "string", "format": "date-time" },
+    "pr": {
+      "type": "object",
+      "properties": { "number": { "type": "integer" }, "url": { "type": "string", "format": "uri" } },
+      "required": ["number", "url"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
