@@ -1,0 +1,20 @@
+{
+  "projects": [
+    {
+      "slug": "twilio-owl-shoes",
+      "title": "Twilio Owl Shoes AI Assistant",
+      "status": "active",
+      "branch": "project/twilio-owl-shoes",
+      "dates": {
+        "announced": "2025-08-23"
+      },
+      "results_count": 1,
+      "last_result": "2025-08-23T12:00:00Z"
+    }
+  ],
+  "summary": {
+    "total_projects": 1,
+    "active_projects": 1,
+    "total_results": 1
+  }
+}

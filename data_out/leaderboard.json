@@ -1,0 +1,28 @@
+{
+  "contributors": [
+    {
+      "github": "yourgh",
+      "points": 1,
+      "reports": 1,
+      "projects": [
+        "twilio-owl-shoes"
+      ],
+      "avg_score": 1
+    }
+  ],
+  "totals": {
+    "contributors": 1,
+    "reports": 1,
+    "points": 1
+  },
+  "last_updated": "2025-08-23T05:52:54.736Z",
+  "period": "all-time",
+  "scoring": {
+    "Critical": 10,
+    "High": 6,
+    "Medium": 3,
+    "Low": 1,
+    "first_report_bonus": 2,
+    "quality_bonus": 1
+  }
+}
