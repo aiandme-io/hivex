@@ -3,6 +3,7 @@
     "title": "Twilio Owl Shoes AI Assistant",
     "status": "active",
     "branch": "project/twilio-owl-shoes",
+    "target_url": "https://github.com/twilio-samples/ai-assistant-demo-owl-shoes",
     "dates": { "announced": "2025-08-23" }
   }
   

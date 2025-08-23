@@ -88,7 +88,8 @@ async function main() {
               contributorStats.set(contributor, {
                 points: 0,
                 reports: 0,
-                projects: new Set()
+                projects: new Set(),
+                by_severity: { Critical: 0, High: 0, Medium: 0, Low: 0 }
               });
             }
             
@@ -96,52 +97,72 @@ async function main() {
             stats.points += score;
             stats.reports += 1;
             stats.projects.add(project.slug);
+            
+            // Track severity breakdown per contributor
+            if (stats.by_severity.hasOwnProperty(result.severity)) {
+              stats.by_severity[result.severity]++;
+            }
           });
         } else {
           console.warn(`⚠️  Invalid result.json for ${project.slug}`);
         }
       }
       
-      // Save project-specific results
+      // Calculate severity breakdown for this project
+      const severityBreakdown = getSeverityBreakdown(projectResults);
+      
+      // Save project-specific results in website-expected format
       if (projectResults.length > 0) {
         await fs.writeJson(
           path.join('data_out', `results-${project.slug}.json`),
           {
-            project: project,
-            results: projectResults,
-            summary: {
+            project: {
+              slug: project.slug,
+              title: project.title,
+              status: project.status,
+              target_url: project.target_url || null,
+              branch: project.branch,
+              commit: project.commit || null,
+              last_updated: projectResults[projectResults.length - 1].submitted_at
+            },
+            stats: {
               total_results: projectResults.length,
-              severity_breakdown: getSeverityBreakdown(projectResults),
-              total_points: projectResults.reduce((sum, r) => sum + calculateScore(r), 0)
-            }
+              by_severity: severityBreakdown
+            },
+            results: projectResults
           },
           { spaces: 2 }
         );
       }
       
+      // Prepare project data for projects index
       projectData.push({
-        ...project,
-        results_count: projectResults.length,
-        last_result: projectResults.length > 0 ? 
-          projectResults[projectResults.length - 1].submitted_at : null
+        slug: project.slug,
+        title: project.title,
+        status: project.status,
+        branch: project.branch,
+        github_branch_url: `https://github.com/aiandme-io/hivex/tree/${project.branch}`,
+        readme_raw_url: `https://raw.githubusercontent.com/aiandme-io/hivex/${project.branch}/README.md`,
+        results_url: `https://data.hivex.aiandme.io/results-${project.slug}.json`,
+        stats: {
+          total_results: projectResults.length,
+          by_severity: severityBreakdown
+        }
       });
     }
     
-    // Generate projects.json
+    // Generate projects.json in website-expected format
     await fs.writeJson(
-      path.join('data_out', 'projects.json'),
+      path.join('data_out', 'index.json'),
       {
-        projects: projectData,
-        summary: {
-          total_projects: projectData.length,
-          active_projects: projectData.filter(p => p.status === 'active').length,
-          total_results: allResults.length
-        }
+        version: "1.0.0",
+        last_updated: new Date().toISOString(),
+        projects: projectData
       },
       { spaces: 2 }
     );
     
-    // Generate leaderboard.json
+    // Generate leaderboard.json in website-expected format
     const leaderboard = generateLeaderboard(contributorStats, allResults);
     await fs.writeJson(
       path.join('data_out', 'leaderboard.json'),
@@ -246,10 +267,18 @@ function getSeverityBreakdown(results) {
 function generateLeaderboard(contributorStats, allResults) {
   const contributors = Array.from(contributorStats.entries()).map(([github, stats]) => ({
     github,
+    display: github, // Use github username as display name
     points: stats.points,
     reports: stats.reports,
-    projects: Array.from(stats.projects),
-    avg_score: stats.points / stats.reports
+    by_severity: stats.by_severity,
+    bonuses: {
+      first_report: 0, // Could be calculated if needed
+      quality_bonus: 0  // Could be calculated if needed
+    },
+    by_project: Array.from(stats.projects).reduce((acc, project) => {
+      acc[project] = 1; // Simple count, could be enhanced
+      return acc;
+    }, {})
   }));
   
   // Sort by points (descending)
@@ -262,15 +291,15 @@ function generateLeaderboard(contributorStats, allResults) {
   };
   
   return {
-    contributors,
-    totals,
     last_updated: new Date().toISOString(),
     period: 'all-time',
     scoring: {
       ...SEVERITY_SCORES,
       first_report_bonus: BONUSES.first_report,
       quality_bonus: BONUSES.quality_bonus
-    }
+    },
+    contributors,
+    totals
   };
 }
 

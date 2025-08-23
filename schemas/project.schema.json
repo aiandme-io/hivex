@@ -8,6 +8,7 @@
     "title": { "type": "string", "minLength": 3 },
     "status": { "enum": ["planned", "active", "published", "archived"] },
     "branch": { "type": "string", "pattern": "^project/.+" },
+    "target_url": { "type": "string", "format": "uri" },
     "dates": {
       "type": "object",
       "properties": {
