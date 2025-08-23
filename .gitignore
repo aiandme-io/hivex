@@ -136,3 +136,6 @@ Thumbs.db
 # Project specific
 results/*/result.json
 !schemas/result.schema.json
+
+# Generated data output
+data_out/
