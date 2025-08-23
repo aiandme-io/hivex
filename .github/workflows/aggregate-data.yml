@@ -36,17 +36,6 @@ jobs:
           
           # Run the aggregation script
           node scripts/aggregate-data.js
-          
-          # Add version info to index.json
-          cat > data_out/index.json <<JSON
-          {
-            "version": "$TS-$COMMIT",
-            "last_updated": "$TS",
-            "projects": $(cat data_out/projects.json | jq -r '.projects | length'),
-            "total_results": $(cat data_out/leaderboard.json | jq -r '.totals.reports'),
-            "total_contributors": $(cat data_out/leaderboard.json | jq -r '.totals.contributors')
-          }
-          JSON
 
       - name: Add Vercel project metadata + headers
         run: |
