@@ -41,14 +41,14 @@ jobs:
         run: |
           mkdir -p data_out/.vercel
           printf '{"projectId":"%s","orgId":"%s"}' "$VERCEL_PROJECT_ID" "$VERCEL_ORG_ID" > data_out/.vercel/project.json
+          # TODO: Review CORS policy - currently using wildcard for development access
+          # Consider implementing environment-based CORS or dynamic origin validation
           cat > data_out/vercel.json << 'JSON'
           {
             "headers": [
               {
                 "source": "/(.*)",
                 "headers": [
-                  # TODO: Review CORS policy - currently using wildcard for development access
-                  # Consider implementing environment-based CORS or dynamic origin validation
                   { "key": "Access-Control-Allow-Origin", "value": "*" },
                   { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
                   { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, Cache-Control" },
@@ -59,8 +59,6 @@ jobs:
               {
                 "source": "/api/(.*)",
                 "headers": [
-                  # TODO: Review CORS policy - currently using wildcard for development access
-                  # Consider implementing environment-based CORS or dynamic origin validation
                   { "key": "Access-Control-Allow-Origin", "value": "*" },
                   { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
                   { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, Cache-Control" },
@@ -70,8 +68,6 @@ jobs:
               {
                 "source": "/(.*\\.json)",
                 "headers": [
-                  # TODO: Review CORS policy - currently using wildcard for development access
-                  # Consider implementing environment-based CORS or dynamic origin validation
                   { "key": "Access-Control-Allow-Origin", "value": "*" },
                   { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS, HEAD" },
                   { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, Cache-Control" },
